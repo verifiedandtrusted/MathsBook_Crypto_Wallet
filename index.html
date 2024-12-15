@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maths Book Game with P2P Wallet</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #000428, #4a148c, #81d4fa);
+            margin: 0;
+            padding: 0;
+            color: gold;
+            text-align: center;
+            overflow-x: hidden;
+        }
+        #loadingPage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #2a0845, #6441a5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: #FFD700;
+            font-size: 2em;
+            animation: glow 2s ease-in-out infinite alternate;
+            z-index: 1000;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700; }
+            to { text-shadow: 0 0 20px #FF4500, 0 0 40px #FF4500; }
+        }
+        .exchange-button, .referral-button {
+            display: inline-block;
+            margin-top: 20px;
+        }
+        #extraButtons {
+    margin-top: 20px;
+       }
+#exchangeButton, #referralButton {
+    display: inline-block;
+    margin: 10px;
+    cursor: pointer;
+}
+
+        .help-button, .wallet-button {
+            position: absolute;
+            font-size: 2em;
+            background: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .help-button { top: 20px; right: 20px; }
+        .wallet-button { top: 20px; left: 20px; }
+        .help-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #000000;
+            color: purple;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 20px;
+            background: #9642c7;
+            color: gold;
+            box-shadow: 0 4px 8px rgba(0, 3, 1, 0.1);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .button:hover {
+            background: #ff095;
+            transform: translateY(-5px);
+        }
+        #gameContainer, #walletContainer, #loginContainer {
+            display: none;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 3em;
+            color: #FFD700;
+            text-shadow: 2px 2px 10px rgba(0, 0, 3, 0.2);
+        }
+        #timer, #levelLockoutTimer {
+            font-size: 1.5em;
+            color: #FF4500;
+            margin-top: 10px;
+        }
+        .answer {
+            display: block;
+            padding: 15px;
+            margin: 15px auto;
+            font-size: 1.2em;
+            background-color: #333;
+            color: white;
+            border: 1px solid #ff4081;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 80%;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .answer:hover {
+            background-color: #ff4081;
+        }
+        .wallet-section, .login-section {
+            padding: 10px;
+        }
+        .book-emoji {
+            font-size: 3em;
+            position: absolute;
+            top: 90%;
+            left: 10%;
+            cursor: pointer;
+            animation: float 2s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        .reward-notification {
+            position: absolute;
+            top: 85%;
+            left: 10%;
+            font-size: 1.5em;
+            color: #119e43;
+            animation: fadeOut 1s ease-out;
+            opacity: 1;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="loadingPage">
+        <p>📚 Welcome to Maths Book Cryptocurrency Mining and P2P wallet 📖</p>
+        <p>Listing on the Bitcoin Network...</p>
+    </div>
+
+    <div id="gameContainer">
+        <h1>Select Level</h1>
+        <p id="balanceDisplay">MathsBook Balance: <strong id="mathsBookBalance"></strong> MathsBook</p>
+        <button class="button" onclick="startGame('basic')">Basic</button>
+        <button class="button" onclick="startGame('medium')">Medium</button>
+        <button class="button" onclick="startGame('advanced')">Advanced</button>
+        <p id="timer">Time Left: 1:00</p>
+        <p id="levelLockoutTimer" class="hidden">Next game available in: </p>
+         <div id="extraButtons">
+    <button class="button" id="exchangeButton">Exchange</button>
+      <button class="button" id="referralButton">Referral</button>
+</div>
+        <div id="questionContainer"></div>
+        <p id="finalScore" class="hidden"></p>
+        <div id="dailyRewardSection">
+            <h2>Daily Reward</h2>
+            <button class="button" onclick="claimDailyReward()">Claim Daily Reward</button>
+            <p id="rewardMessage"></p>
+        </div>
+        <div id="mathsBookCodeSection">
+            <h2>Redeem MathsBook Code</h2>
+            <input type="text" id="mathsBookCode" placeholder="Enter MathsBook code" />
+            <button class="button" onclick="redeemMathsBookCode()">Redeem</button>
+            <p id="codeMessage"></p>
+        </div>
+        <span class="book-emoji" onclick="collectBookToken()">📖</span>
+        <button class="help-button" onclick="toggleHelp()">?</button>
+        <button class="wallet-button" onclick="openWallet()">🛄</button>
+        <div id="helpModal" class="help-modal">
+            <p><strong>How to Play:</strong></p>
+            <p>Choose a level and solve as many math questions as possible within 1 minute to earn MathsBook tokens,Each correct question is =1 MathsBook.</p>
+            <p><strong>Daily Reward:</strong> Claim a daily reward each day, increasing up to 7 days! MBK 1,5, 10, 15, 20, 50, 100 also tap the floating maths book😊.Watch Videos & Earn 100 MBK per video,Send & receive MBK in wallet🛄. You can also Earn BTC and bonus MathsBook by sharing referall link,Maths Book Exchange shows the real live Price and USDT balance which will be withdrawn on listing day.</p>
+            <span class="close-modal" onclick="toggleHelp()">X</span>
+        </div>
+    </div>
+
+    <div id="loginContainer" class="login-section">
+        <h2>MathsBook Wallet Login</h2>
+        <input type="text" id="loginID" placeholder="Enter your Telegram ID">
+        <button class="button" onclick="loginToWallet()">Login</button>
+    </div>
+
+    <div id="walletContainer" class="wallet-section">
+        <h1>MathsBook P2P Wallet</h1>
+        <p>Your Telegram ID: <span id="walletTelegramID"></span></p>
+        <button class="button" onclick="goBack()">Back</button>
+        <p>Balance: <span id="walletBalanceDisplay"></span> MathsBook</p>
+        <h3>Send MathsBook</h3>
+        <input type="text" id="recipientID" placeholder="Recipient Telegram ID">
+        <input type="number" id="sendAmount" placeholder="Amount to Send">
+        <input type="text" id="sendMessage" placeholder="Sign Message">
+        <button class="button" onclick="generateTransferCode()">Generate Transfer Code</button>
+        <p id="generatedCode"></p>
+        <h3>Receive MathsBook</h3>
+        <input type="text" id="transferCode" placeholder="Enter Transfer Code">
+        <input type="number" id="receiveAmount" placeholder="Amount to Verify">
+        <input type="text" id="receiveMessage" placeholder="Verify Sign Message">
+        <button class="button" onclick="decodeTransferCode()">Redeem Code</button>
+        <h3>Transaction History</h3>
+        <button class="button" onclick="toggleHistory()">📝 History</button>
+        <ul id="historyList" class="hidden"></ul>
+    </div>
+
+    <script>
+        function transitionToMainPage() {
+            document.getElementById('loadingPage').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+            document.getElementById("mathsBookBalance").innerText = mathsBookBalance.toFixed(2);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(transitionToMainPage, 3000);
+        });
+
+        let mathsBookBalance = parseFloat(localStorage.getItem('mathsBookBalance')) || 0;
+        let telegramID = localStorage.getItem('telegramID');
+        let usedCodes = JSON.parse(localStorage.getItem("usedCodes")) || [];
+        const validCodes = ["MATH2024", "BOOK2024", "TOKEN2024", "WINNER2024", "MB127", "GJYO5", "907BOOK", "1DOLLARperCOIN", "FUN2024", 
+"COOL024", "MONEY2024", "MB025", "HAPPY202", "LUCK2024", "SMARTBOOK", "GENIUS204", "PASS2024", "EASYMBK", 
+"GETBOOK", "COINWIN", "WINMBK", "HERO2024", "FINDTOKEN", "MYCOIN2024", "SHARE2034", "FUNNYMBK", "BOOST2024", 
+"MBWIN2074", "TOKENFINDER", "LUCKYBOOK", "NEWCOIN2024", "PRIZE2004", "TREASURE24", "COOLCOIN", "GETMORE", 
+"WINNERCOIN", "REWARD24", "1COIN4U", "NEWBOOK24", "EASYCOIN", "1MBFORU", "EXTRABOOK", "BOOKGENIUS", 
+"TOPTOKEN", "BONUS25", "RICHCOIN", "LUCK24", "GETWIN", "WINSOON", "LUCKMBK", "GREAT2025", "FUNNY2025", 
+"GOODLUCK", "SMART2064", "TOPMBK", "GOLDEN24", "BESTCOIN", "TOPPRIZE", "WINBIG24", "1DOLLARMORE", "MOREWIN24", 
+"MYLUCK24", "NEWBOOK2BTC", "SMALLCOIN", "LUCKYNOW", "TOKENBOOST", "REWARD24", "WINBIG2044", "GOODTOKEN", 
+"HUGEWIN245", "MYPRIZE24", "FRESHCOIN", "WINCOIN240", "EXTRATOKEN", "RICHBOOK", "LUCKFORU", "SHAREBIG", 
+"PRIZECOIN", "DREAM2024", "GETBOOK24", "1TOKEN4U", "LUCKY2024", "SUPERMBK", "MBK24", "LUCKCOIN", 
+"MOREBOOK24", "WINLUCKY", "PRIZEMORE", "BIGCOIN241", "LUCKBOOK", "REWARDS20242", "GETBIGCOIN", "COINHERO", 
+"GETLUCK24", "BIGWIN2024", "LUCKYTOKEN", "MBKLUCKY", "SHINE24", "WINPRIZE", "BIGMBK24", "BONUSPRIZE100"]
+;
+        const lockoutTimes = JSON.parse(localStorage.getItem('lockoutTimes')) || { basic: 0, medium: 0, advanced: 0 };
+
+        let gameInterval;
+        let gameTime = 60;
+        let questionInterval;
+
+        function shuffleOptions(options) {
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        const randomBasicQuestion = () => {
+            const a = Math.floor(Math.random() * 10);
+            const b = Math.floor(Math.random() * 10);
+            const correctAnswer = a + b;
+            const options = shuffleOptions([correctAnswer, correctAnswer + 1, correctAnswer - 1, correctAnswer + 2]);
+            return { question: `What is ${a} + ${b}?`, options, answer: correctAnswer };
+        };
+
+        const randomMediumQuestion = () => {
+            const a = Math.floor(Math.random() * 20);
+            const b = Math.floor(Math.random() * 10);
+            const correctAnswer = a * b;
+            const options = shuffleOptions([correctAnswer, correctAnswer - 10, correctAnswer + 10, correctAnswer - 5]);
+            return { question: `What is ${a} * ${b}?`, options, answer: correctAnswer };
+        };
+
+        const randomAdvancedQuestion = () => {
+            const derivative = Math.floor(Math.random() * 10);
+            return { question: `What is the derivative of ${derivative}x?`, answer: `${derivative}` };
+        };
+
+        function startGame(level) {
+            clearInterval(gameInterval);
+            clearInterval(questionInterval);
+            gameTime = 60;
+
+            const lockoutTime = lockoutTimes[level] || 0;
+            if (Date.now() < lockoutTime) {
+                alert("Play this level again after three hours.");
+                return;
+            }
+
+            const getQuestion = (lvl) => lvl === "basic" ? randomBasicQuestion() : lvl === "medium" ? randomMediumQuestion() : randomAdvancedQuestion();
+
+            const displayNextQuestion = () => {
+                const questionObj = getQuestion(level);
+                let optionsHTML;
+                if (questionObj.options) {
+                    optionsHTML = questionObj.options.map(opt => `<button class="answer" onclick="submitAnswer('${opt}', '${questionObj.answer}', '${level}')">${opt}</button>`).join('');
+                } else {
+                    optionsHTML = `<input type="text" id="advancedAnswer"><button class="answer" onclick="submitAnswer(document.getElementById('advancedAnswer').value, '${questionObj.answer}', '${level}')">Submit</button>`;
+                }
+                document.getElementById("questionContainer").innerHTML = `<p>${questionObj.question}</p>${optionsHTML}`;
+            };
+
+            displayNextQuestion();
+
+            questionInterval = setInterval(displayNextQuestion, 5000);
+
+            gameInterval = setInterval(() => {
+                if (gameTime > 0) {
+                    gameTime--;
+                    document.getElementById("timer").innerText = `Time Left: ${Math.floor(gameTime / 60)}:${gameTime % 60 < 10 ? '0' + gameTime % 60 : gameTime % 60}`;
+                } else {
+                    clearInterval(gameInterval);
+                    clearInterval(questionInterval);
+                    endGame(level);
+                }
+            }, 1000);
+        }
+
+        function submitAnswer(selectedAnswer, correctAnswer, level) {
+            if (selectedAnswer == correctAnswer) {
+                mathsBookBalance += 1.0;
+                localStorage.setItem("mathsBookBalance", mathsBookBalance);
+                document.getElementById("mathsBookBalance").innerText = mathsBookBalance.toFixed(2);
+            }
+            displayNextQuestion();  // Move to the next question automatically
+        }
+
+        function endGame(level) {
+            lockoutTimes[level] = Date.now() + 3 * 60 * 60 * 1000;
+            localStorage.setItem('lockoutTimes', JSON.stringify(lockoutTimes));
+            alert("Game over! Time's up.");
+        }
+
+        function claimDailyReward() {
+            const dailyRewards = [1, 5, 10, 15, 20, 50, 100];
+            const lastClaimTime = parseInt(localStorage.getItem("lastClaimTime")) || 0;
+            let dailyRewardStreak = parseInt(localStorage.getItem("dailyRewardStreak")) || 1;
+            const currentTime = Date.now();
+
+            if (currentTime - lastClaimTime >= 86400000) {
+                mathsBookBalance += dailyRewards[dailyRewardStreak - 1];
+                localStorage.setItem("mathsBookBalance", mathsBookBalance);
+                document.getElementById("mathsBookBalance").innerText = mathsBookBalance.toFixed(2);
+
+                dailyRewardStreak = (dailyRewardStreak < 7) ? dailyRewardStreak + 1 : 1;
+                localStorage.setItem("lastClaimTime", currentTime);
+                localStorage.setItem("dailyRewardStreak", dailyRewardStreak);
+                document.getElementById("rewardMessage").innerText = `You claimed ${dailyRewards[dailyRewardStreak - 1]} MathsBook!`;
+            } else {
+                alert("Daily reward already claimed.");
+            }
+        }
+
+        function redeemMathsBookCode() {
+            const inputCode = document.getElementById("mathsBookCode").value.trim();
+            const codeMessage = document.getElementById("codeMessage");
+            if (validCodes.includes(inputCode) && !usedCodes.includes(inputCode)) {
+                mathsBookBalance += 100;
+                usedCodes.push(inputCode);
+                localStorage.setItem('usedCodes', JSON.stringify(usedCodes));
+                localStorage.setItem('mathsBookBalance', mathsBookBalance);
+                document.getElementById('mathsBookBalance').innerText = mathsBookBalance.toFixed(2);
+                codeMessage.innerText = 'Code redeemed successfully! You earned 100 MathsBook.';
+                codeMessage.style.color = 'green';
+            } else {
+                codeMessage.innerText = 'Invalid or already used MathsBook code.';
+                codeMessage.style.color = 'red';
+            }
+        }
+
+        function collectBookToken() {
+            mathsBookBalance += 0.0005;
+            localStorage.setItem("mathsBookBalance", mathsBookBalance);
+            document.getElementById("mathsBookBalance").innerText = mathsBookBalance.toFixed(3);
+            const notification = document.createElement("span");
+            notification.classList.add("reward-notification");
+            notification.innerText = "+ 0.0005";
+            document.body.appendChild(notification);
+            setTimeout(() => document.body.removeChild(notification), 1000);
+        }
+
+        function openWallet() {
+            document.getElementById("gameContainer").style.display = "none";
+            if (!telegramID) {
+                document.getElementById("loginContainer").style.display = "block";
+            } else {
+                loadWallet();
+            }
+        }
+
+        function loginToWallet() {
+            telegramID = document.getElementById("loginID").value.trim();
+            if (telegramID) {
+                localStorage.setItem("telegramID", telegramID);
+                loadWallet();
+            } else {
+                alert("Please enter a valid Telegram ID.");
+            }
+        }
+
+        function loadWallet() {
+            document.getElementById("loginContainer").style.display = "none";
+            document.getElementById("walletContainer").style.display = "block";
+            document.getElementById("walletTelegramID").innerText = telegramID;
+            document.getElementById("walletBalanceDisplay").innerText = mathsBookBalance.toFixed(2);
+            displayTransactionHistory();
+        }
+
+        function goBack() {
+            document.getElementById("walletContainer").style.display = "none";
+            document.getElementById("gameContainer").style.display = "block";
+        }
+
+        function generateTransferCode() {
+            const recipientID = document.getElementById("recipientID").value.trim();
+            const amount = parseFloat(document.getElementById("sendAmount").value);
+            const message = document.getElementById("sendMessage").value.trim();
+            if (!recipientID || amount < 10000 || amount > mathsBookBalance || !message) {
+                alert("Invalid input, minimum transfer is 10,000 MathsBook, or insufficient balance.");
+                return;
+            }
+            mathsBookBalance -= amount;
+            localStorage.setItem("mathsBookBalance", mathsBookBalance);
+            document.getElementById("walletBalanceDisplay").innerText = mathsBookBalance.toFixed(2);
+            const data = `${telegramID}|${recipientID}|${amount}|${message}|${Date.now()}`;
+            const encryptedCode = btoa(data);
+            document.getElementById("generatedCode").innerText = `Transfer Code: ${encryptedCode}`;
+            saveTransaction(`Sent ${amount} MathsBook to ${recipientID}`);
+        }
+
+        function decodeTransferCode() {
+            const encryptedCode = document.getElementById("transferCode").value.trim();
+            const expectedAmount = parseFloat(document.getElementById("receiveAmount").value);
+            const expectedMessage = document.getElementById("receiveMessage").value.trim();
+
+            if (!encryptedCode || usedCodes.includes(encryptedCode)) {
+                alert("Invalid or already used transfer code.");
+                return;
+            }
+
+            const decodedData = atob(encryptedCode).split('|');
+            if (decodedData[1] === telegramID && parseFloat(decodedData[2]) === expectedAmount && decodedData[3] === expectedMessage) {
+                mathsBookBalance += expectedAmount;
+                localStorage.setItem("mathsBookBalance", mathsBookBalance);
+                document.getElementById("walletBalanceDisplay").innerText = mathsBookBalance.toFixed(2);
+                usedCodes.push(encryptedCode);
+                localStorage.setItem("usedCodes", JSON.stringify(usedCodes));
+                saveTransaction(`Received ${expectedAmount} MathsBook from ${decodedData[0]}`);
+                alert("Transfer successful!");
+            } else {
+                alert("Transfer code details do not match.");
+            }
+        }
+
+        function toggleHistory() {
+            document.getElementById("historyList").classList.toggle("hidden");
+        }
+
+        function saveTransaction(transaction) {
+            const history = JSON.parse(localStorage.getItem("transactionHistory")) || [];
+            history.unshift({ transaction, date: new Date().toLocaleString() });
+            localStorage.setItem("transactionHistory", JSON.stringify(history));
+            displayTransactionHistory();
+        }
+
+        function displayTransactionHistory() {
+            const historyList = document.getElementById("historyList");
+            historyList.innerHTML = "";
+            const history = JSON.parse(localStorage.getItem("transactionHistory")) || [];
+            history.forEach(item => {
+                const listItem = document.createElement("li");
+                listItem.innerText = `${item.transaction} - ${item.date}`;
+                historyList.appendChild(listItem);
+            });
+        }
+
+        function toggleHelp() {
+            const helpModal = document.getElementById("helpModal");
+            helpModal.style.display = helpModal.style.display === 'none' || !helpModal.style.display ? 'block' : 'none';
+        }
+         // JavaScript for button functionality
+document.addEventListener("DOMContentLoaded", () => {
+    const exchangeButton = document.getElementById("exchangeButton");
+    const referralButton = document.getElementById("referralButton");
+
+    // Add event listeners for button clicks
+    exchangeButton.addEventListener("click", openExchange);
+    referralButton.addEventListener("click", openReferral);
+});
+
+// Open Exchange website
+function openExchange() {
+    window.open("https://verifiedandtrusted.github.io/MathsBookExchange/", "_blank");
+}
+
+// Open Referral website
+function openReferral() {
+    window.open("https://verifiedandtrusted.github.io/MathsBookReferall/", "_blank");
+}
+
+        // Open Exchange page
+        function openExchange() {
+            window.open("https://verifiedandtrusted.github.io/MathsBookExchange/", "_blank");
+        }
+
+        // Open Referral page
+        function openReferral() {
+            window.open("https://verifiedandtrusted.github.io/MathsBookReferall/", "_blank");
+        }
+    </script>
+</body>
+</html>
